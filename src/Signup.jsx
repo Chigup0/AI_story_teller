@@ -8,7 +8,7 @@ export default function Signup() {
   const [username, setUsername] = useState("");
   const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSignup = async(e) => {
     e.preventDefault();
     // TODO: Call backend API for signup
     console.log("Signing up with", { email, password });
@@ -70,4 +70,4 @@ export default function Signup() {
       </p>
     </div>
   );
-}
+
