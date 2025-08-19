@@ -1,53 +1,87 @@
-import { useState } from "react";
+import { useState , useRef} from "react";
 import "./App.css";
 
-function App() {
+export default function App() {
   const [videoUrl, setVideoUrl] = useState(null);
-  const [input, setInput] = useState("");
+  const [userText, setUserText] = useState("");
+  const [prompt, setPrompt] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const videoRef = useRef(null);
+
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!prompt.trim()) return;
 
     try {
-      // Example API call – replace with your backend URL
-      const res = await fetch("http://localhost:5000/api/video", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: input }),
+      
+      const response = await fetch('http://localhost:8000/generate-video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          story: "Your story content here" 
+        }),
       });
-      const data = await res.json();
 
-      // backend should return: { "url": "https://example.com/video.mp4" }
-      setVideoUrl(data.url);
-      setInput("");
+      if (!response.ok) {
+        throw new Error('Failed to generate video');
+      }
+
+      
+      const videoBlob = await response.blob();
+      
+      
+      const videoObjectUrl = URL.createObjectURL(videoBlob);
+      
+      
+      setVideoUrl(videoObjectUrl);
     } catch (err) {
-      console.error("Error fetching video:", err);
+      setError(err.message);
+      console.error('Error:', err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="app">
-      {/* Show video if available */}
-      <div className="chat-area">
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">
+        Story Video Generation
+      </h1>
+
+      
+      <div className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-2xl space-y-6">
+       
+        <div className="flex gap-2">
+          <div className="input-area">
+          <input
+            type="text"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Enter your story prompt..."
+            className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-400 outline-none height:100"
+          />
+          <button onClick={handleSend}>Send</button>
+</div>
+        </div>
+
+        
+        
+
+        
         {videoUrl && (
-          <div className="video-box">
-            <video src={videoUrl} controls />
+          <div className="relative w-fit mx-auto">
+            <video
+              src={videoUrl}
+              controls
+              width="600"
+              className="rounded-xl shadow-lg"
+            />
           </div>
         )}
-      </div>
-
-      {/* Input + send button */}
-      <div className="input-area">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a request..."
-        />
-        <button onClick={handleSend}>Send</button>
       </div>
     </div>
   );
 }
-
-export default App;
