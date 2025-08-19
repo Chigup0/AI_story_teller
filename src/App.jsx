@@ -1,53 +1,16 @@
-import { useState } from "react";
+import { Route, Routes } from "react-router-dom";
 import "./App.css";
+import Chat from "./Chat.jsx";
+import Login from "./Login.jsx";
+import Signup from "./Signup.jsx";
 
-function App() {
-  const [videoUrl, setVideoUrl] = useState(null);
-  const [input, setInput] = useState("");
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    try {
-      // Example API call – replace with your backend URL
-      const res = await fetch("http://localhost:5000/api/video", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: input }),
-      });
-      const data = await res.json();
-
-      // backend should return: { "url": "https://example.com/video.mp4" }
-      setVideoUrl(data.url);
-      setInput("");
-    } catch (err) {
-      console.error("Error fetching video:", err);
-    }
-  };
-
+export default function App() {
   return (
-    <div className="app">
-      {/* Show video if available */}
-      <div className="chat-area">
-        {videoUrl && (
-          <div className="video-box">
-            <video src={videoUrl} controls />
-          </div>
-        )}
-      </div>
+   <Routes>
+  <Route path="/" element={<Login />} />      {/* default route is login */}
+  <Route path="/chat" element={<Chat />} />   {/* move chat to /chat */}
+  <Route path="/signup" element={<Signup />} />
+</Routes>
 
-      {/* Input + send button */}
-      <div className="input-area">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type a request..."
-        />
-        <button onClick={handleSend}>Send</button>
-      </div>
-    </div>
   );
 }
-
-export default App;
